@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "address.12345",
+      "properties": {
+        "name": "Dallas",
+        "full_address": "Dallas, Texas, United States",
+        "place_formatted": "Texas, United States",
+        "feature_type": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -96.797,
+          32.7767
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "address.67890",
+      "properties": {
+        "name": "Dallas Center",
+        "full_address": "Dallas Center, Iowa, United States",
+        "place_formatted": "Iowa, United States",
+        "feature_type": "place"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -93.992,
+          41.683
+        ]
+      }
+    }
+  ]
+}
