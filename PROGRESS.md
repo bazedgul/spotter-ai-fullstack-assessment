@@ -1,7 +1,7 @@
 # Progress Tracker — Weather-Aware Truck Routing
 
 - [x] **M0: Scaffolding** — Repo structure, Django+DRF, Vite+React18+TS, Makefile, configs, `/api/health`, `.env.example`, `PROGRESS.md`
-- [ ] **M1: Domain Core & Tests** — Pure Python domain (`trucksafe/domain`), models, geo, risk rules, checkpoints, aggregation, recommendation, full boundary test suite
+- [x] **M1: Domain Core & Tests** — Pure Python domain (`trucksafe/domain`), models, geo, risk rules, checkpoints, aggregation, recommendation, full boundary test suite
 - [ ] **M2: Adapters & Fixtures** — Real API fixtures recorded in `backend/tests/fixtures/`, `docs/PROVIDER_NOTES.md`, Mapbox/OSRM routing adapters + fallback + via-augment, Open-Meteo weather + cache + interpolation, Mapbox geocoding, timezones
 - [ ] **M3: Analyze Service & API** — Analyze pipeline orchestrator, presenters, serializers, error envelope, throttles, golden integration test
 - [ ] **M4: Frontend Core** — Trip form + geocoding combobox, results cards, checkpoint table, MapLibre routes + checkpoints + popups, selection sync
@@ -11,3 +11,4 @@
 
 ## Milestone Notes
 - **M0**: Completed. Scaffolding, Django + DRF, Vite + React 18 + TS strict + Tailwind, vitest, pytest, ruff, mypy, `/api/health` integration test all green. CI workflow configured.
+- **M1**: Completed. Pure Python domain (`models.py`, `units.py`, `geo.py`, `risk.py`, `checkpoints.py`, `aggregate.py`, `recommend.py`), 70 unit tests passing, full Section 9.1 boundary tests, mypy clean with zero errors.
