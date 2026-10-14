@@ -34,3 +34,8 @@ dist-ssr/
 # OS
 .DS_Store
 Thumbs.db
+
+# Documentation generated during development
+docs/
+*.md
+!README.md

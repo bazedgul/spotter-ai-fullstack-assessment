@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: trucksafe
+    runtime: docker
+    healthCheckPath: /api/health
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: DJANGO_ALLOWED_HOSTS
+        value: '*'
+      - key: DJANGO_DEBUG
+        value: '0'
+      - key: ROUTING_PROVIDER
+        value: mapbox
+      - key: MAPBOX_TOKEN
+        sync: false

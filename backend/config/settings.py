@@ -3,7 +3,15 @@
 import os
 from pathlib import Path
 
+try:
+    from dotenv import load_dotenv
+except ImportError:  # pragma: no cover - production installs include python-dotenv
+    load_dotenv = None
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+if load_dotenv is not None:
+    load_dotenv(BASE_DIR.parent / ".env")
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-secret-key-trucksafe-spotter-ai")
 

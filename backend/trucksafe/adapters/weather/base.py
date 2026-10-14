@@ -3,7 +3,7 @@
 import math
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Literal, Protocol
 
 from trucksafe.domain.models import WeatherSample
 
@@ -75,7 +75,9 @@ def interpolate_at(series: WeatherSeries, target_utc: datetime) -> WeatherSample
         g = series.gust_mph[h0]
         r = series.rain_in_hr[h0]
         s = series.snow_in_hr[h0]
-        status = "available" if (w is not None and r is not None and s is not None) else "missing"
+        status: Literal["available", "missing"] = (
+            "available" if (w is not None and r is not None and s is not None) else "missing"
+        )
         return WeatherSample(wind_mph=w, gust_mph=g, rain_in_hr=r, snow_in_hr=s, status=status)
 
     fraction = h_idx_float - h0
@@ -92,7 +94,7 @@ def interpolate_at(series: WeatherSeries, target_utc: datetime) -> WeatherSample
     r_val = lerp(series.rain_in_hr)
     s_val = lerp(series.snow_in_hr)
 
-    status = (
+    interpolated_status: Literal["available", "missing"] = (
         "available"
         if (w_val is not None and r_val is not None and s_val is not None)
         else "missing"
@@ -103,5 +105,5 @@ def interpolate_at(series: WeatherSeries, target_utc: datetime) -> WeatherSample
         gust_mph=g_val,
         rain_in_hr=r_val,
         snow_in_hr=s_val,
-        status=status,
+        status=interpolated_status,
     )

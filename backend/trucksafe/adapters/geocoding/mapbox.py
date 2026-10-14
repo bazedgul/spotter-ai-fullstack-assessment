@@ -69,6 +69,20 @@ class MapboxGeocodingProvider:
 
     def _fallback_geocode(self, query: str, limit: int) -> list[GeocodeResult]:
         """Keyless fallback using Photon (OSM-based geocoder)."""
+        # Keep the local demo usable when both the server-side Mapbox token and
+        # outbound geocoding access are unavailable. These are deterministic
+        # city-centre coordinates, not route or weather data.
+        demo_places = {
+            "dallas": GeocodeResult("Dallas, TX, United States", 32.7767, -96.7970),
+            "houston": GeocodeResult("Houston, TX, United States", 29.7604, -95.3698),
+            "denver": GeocodeResult("Denver, CO, United States", 39.7392, -104.9903),
+            "austin": GeocodeResult("Austin, TX, United States", 30.2672, -97.7431),
+            "chicago": GeocodeResult("Chicago, IL, United States", 41.8781, -87.6298),
+        }
+        local = demo_places.get(query.casefold())
+        if local is not None:
+            return [local]
+
         url = "https://photon.komoot.io/api/"
         params = {"q": query, "limit": str(limit)}
         try:
