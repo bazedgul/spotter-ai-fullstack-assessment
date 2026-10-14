@@ -1,7 +1,9 @@
 import type { AnalyzeRequest, AnalyzeResponse, HeatmapRequest, HeatmapResponse, Location } from './types'
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...init })
+  const response = await fetch(`${API_BASE_URL}${url}`, { headers: { 'Content-Type': 'application/json' }, ...init })
   const body = await response.json() as T | { error?: { message?: string } }
   if (!response.ok) throw new Error((body as { error?: { message?: string } }).error?.message ?? 'Request failed')
   return body as T
