@@ -1,9 +1,11 @@
 """Open-Meteo Forecast API adapter with caching, unit assertions, and chunking."""
 
 import logging
+import random
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, date, datetime, timedelta
+from email.utils import parsedate_to_datetime
 from typing import Any
 
 import httpx
@@ -35,6 +37,7 @@ class OpenMeteoWeatherProvider:
     """Weather provider for Open-Meteo batch hourly forecast."""
 
     BASE_URL = "https://api.open-meteo.com/v1/forecast"
+    MAX_BACKOFF_SECONDS = 30.0
 
     def __init__(
         self,
@@ -123,7 +126,7 @@ class OpenMeteoWeatherProvider:
             "end_date": end_date.isoformat(),
         }
 
-        last_err: Exception | None = None
+        last_err: str | None = None
         for attempt in range(self.max_retries + 1):
             try:
                 with httpx.Client(timeout=self.timeout) as client:
@@ -132,16 +135,41 @@ class OpenMeteoWeatherProvider:
                         data = resp.json()
                         return self.parse_response(data, cells)
                     if resp.status_code in (429, 500, 502, 503, 504):
-                        time.sleep(0.2 * (2**attempt))
+                        last_err = f"HTTP {resp.status_code} ({resp.reason_phrase})"
+                        if attempt < self.max_retries:
+                            delay = self._retry_delay(resp, attempt)
+                            time.sleep(delay)
                         continue
                     raise WeatherAdapterError(
                         f"Open-Meteo returned status {resp.status_code}: {resp.text}"
                     )
             except (httpx.TimeoutException, httpx.NetworkError) as err:
-                last_err = err
-                time.sleep(0.2 * (2**attempt))
+                last_err = f"{type(err).__name__}: {err}"
+                if attempt < self.max_retries:
+                    time.sleep(self._retry_delay(None, attempt))
 
         raise WeatherUnavailable(f"Open-Meteo unreachable after retries: {last_err}")
+
+    @classmethod
+    def _retry_delay(cls, response: httpx.Response | None, attempt: int) -> float:
+        """Return a bounded Retry-After delay or jittered exponential backoff."""
+        if response is not None and response.status_code == 429:
+            retry_after = response.headers.get("Retry-After")
+            if retry_after:
+                try:
+                    return min(cls.MAX_BACKOFF_SECONDS, max(0.0, float(retry_after)))
+                except ValueError:
+                    try:
+                        retry_at = parsedate_to_datetime(retry_after)
+                        if retry_at.tzinfo is None:
+                            retry_at = retry_at.replace(tzinfo=UTC)
+                        seconds = (retry_at - datetime.now(UTC)).total_seconds()
+                        return min(cls.MAX_BACKOFF_SECONDS, max(0.0, seconds))
+                    except (TypeError, ValueError, OverflowError):
+                        pass
+
+        base = min(cls.MAX_BACKOFF_SECONDS, 0.5 * (2**attempt))
+        return min(cls.MAX_BACKOFF_SECONDS, base + random.uniform(0.0, 0.25))
 
     @classmethod
     def parse_response(
